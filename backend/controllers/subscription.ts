@@ -7,7 +7,8 @@ export async function CreateSubscriptionList(req: Request, res: Response): Promi
     try {
         // Validate that we don't have same name subscription in the list
         const subscriptionList = await runQuery(
-            `SELECT * FROM public.subscriptions_list WHERE name = '${name}'`
+            `SELECT * FROM public.subscriptions_list WHERE LOWER(name) = LOWER($1)`,
+            [name]
         );
 
         // Return an error if the subscription already exists
@@ -23,15 +24,8 @@ export async function CreateSubscriptionList(req: Request, res: Response): Promi
         await runQuery(
             `INSERT INTO subscriptions_list 
             (lister_wallet, name, details, amount, status, currency, period) 
-            VALUES (
-                '${lister_wallet}', 
-                '${name}', 
-                '${details}', 
-                ${amount}, 
-                'ACTIVE', 
-                '${currency}', 
-                '${period}'
-            )`
+            VALUES ($1, $2, $3, $4, 'ACTIVE', $5, $6)`,
+            [lister_wallet, name, details, amount, currency, period]
         );
         
         // Return success when 
