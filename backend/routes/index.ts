@@ -1,5 +1,5 @@
 import { Application, Request, Response } from "express";
-import { CreateSubscriptionList } from "../controllers/subscription";
+import { CreateSubscriptionList, DeleteSubscriptionList } from "../controllers/subscription";
 
 const Router = (server: Application) => {
   // home route with the get method and a handler
@@ -19,5 +19,6 @@ const Router = (server: Application) => {
     }
   });
   server.post("/createsubscriptionlist", CreateSubscriptionList);
+  server.delete("/deletesubscriptionlist/:name", DeleteSubscriptionList);
 };
 export default Router;

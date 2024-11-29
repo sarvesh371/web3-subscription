@@ -54,4 +54,30 @@ export async function CreateSubscriptionList(req: Request, res: Response): Promi
         message: "Internal Server Error",
       });
     }
-  }
+}
+
+export async function DeleteSubscriptionList(req: Request, res: Response): Promise<void> {
+    const { name } = req.params; // Extract subscription ID from URL path
+
+    try {
+        // Delete the subscription
+        await runQuery(
+            `DELETE FROM public.subscriptions_list WHERE LOWER(name) = LOWER($1)`,
+            [name]
+        );
+        // Return success when 
+        res.status(204).json({
+            status: "success",
+            data: [],
+            message:
+                "Your subscription has been deleted successfully !!",
+        });
+        return;
+    } catch (err) {
+      res.status(500).json({
+        status: "error",
+        data: [],
+        message: "Internal Server Error",
+      });
+    }
+}
