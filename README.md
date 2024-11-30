@@ -19,7 +19,7 @@ Feel free to reach out if you have any questions or encounter problems—contrib
 ## Authors
 
 - [@codimow](https://www.github.com/codimow)
-- [@kiratcode1](https://github.com/kiritocode1)
+- [@kiritocode1](https://github.com/kiritocode1)
 - [@sarvesh371](https://github.com/sarvesh371)
 - [@Sivasuryaa0706](https://github.com/Sivasuryaa0706)
 
