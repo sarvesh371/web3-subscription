@@ -15,15 +15,11 @@ module.exports = {
         if (!interaction.isChatInputCommand()) return;
 
         const key = interaction.options.getString('key', true);
-        const member = interaction.member;
-        const guild = interaction.guild;
+        const { member, guild } = interaction;
 
         // Validate member and guild presence
         if (!member || !guild) {
-            return await interaction.reply({
-                content: 'Unable to process your request.',
-                ephemeral: true
-            });
+            return await interaction.reply({content: 'Unable to process your request.',ephemeral: true});
         }
 
         // Check key validity
@@ -31,9 +27,7 @@ module.exports = {
         
         if (!keyData?.valid) {
             return await interaction.reply({
-                content: 'Invalid or already used access key.',
-                ephemeral: true
-            });
+                content: 'Invalid or already used access key.',ephemeral: true});
         }
 
         try {
@@ -42,43 +36,34 @@ module.exports = {
 
             if (!useResult?.success) {
                 return await interaction.reply({
-                    content: 'Failed to use access key.',
-                    ephemeral: true
-                });
+                    content: 'Failed to use access key.',ephemeral: true});
             }
 
             // Validate roleId
             const roleId = useResult.role_id;
             if (!roleId) {
                 return await interaction.reply({
-                    content: 'No role ID found for this access key.',
-                    ephemeral: true
-                });
+                    content: 'No role ID found for this access key.',ephemeral: true});
             }
 
-            console.log('Role ID to add:', roleId); // Add this line for debugging
+            console.log('Role ID to add:', roleId); // debugging
 
             // Attempt to add the role
             await member.roles.add(roleId);
 
             // Construct response message
-            let responseMessage = 'Role successfully added!';
-            if (keyData.key_type === 'time_limited') {
-                responseMessage += ' This is a time-limited access.';
-            } else if (keyData.key_type === 'multi_use') {
-                responseMessage += ` You have ${keyData.max_uses - keyData.currentUses - 1} uses remaining.`;
-            }
-
-            await interaction.reply({
-                content: responseMessage,
-                ephemeral: true
-            });
+            let responseMessage = 'Role sucessfully added!';
+            responseMessage += keyData.key_type === 'time-limited'
+            ? 'This is a time-limited access.'
+            :keyData.key_type === 'multi-use'
+            ? `You have ${keyData.max_uses - key.Data.currentUses -1} uses remaining.`
+            : '';
+        
+        await interaction.reply({ content: responseMessage, ephemeral: true });
         } catch (error) {
             console.error('Error processing access key:', error);
-            await interaction.reply({
-                content: 'An error occurred while processing your key.',
-                ephemeral: true
-            });
+            await interaction.reply({ content: 'An error occured while processing your key.', ephemeral: true });
         }
     }
 };
+ 

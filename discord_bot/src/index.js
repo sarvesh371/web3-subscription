@@ -7,9 +7,9 @@ require('dotenv').config();
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers, // Ensure this is enabled in the Developer Portal
+        GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent // Ensure this is enabled in the Developer Portal if needed
+        GatewayIntentBits.MessageContent
     ],
     partials: [Partials.Channel]
 });
@@ -17,27 +17,27 @@ const client = new Client({
 // Create a collection to store commands
 client.commands = new Collection();
 
-// Load commands
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-
-for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
-
-    if ('data' in command && 'execute' in command) {
-        client.commands.set(command.data.name, command);
-    } else {
-        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+// Load commands dynamically
+const loadCommands = (commandsPath) => {
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+    for (const file of commandFiles) {
+        const filePath = path.join(commandsPath, file);
+        const command = require(filePath);
+        if ('data' in command && 'execute' in command) {
+            client.commands.set(command.data.name, command);
+        } else {
+            console.warn(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+        }
     }
-}
+};
+
+loadCommands(path.join(__dirname, 'commands'));
 
 // Handle interactions (slash commands)
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
     const command = client.commands.get(interaction.commandName);
-
     if (!command) {
         console.error(`No command matching ${interaction.commandName} was found.`);
         return;
@@ -47,16 +47,11 @@ client.on('interactionCreate', async (interaction) => {
         await command.execute(interaction);
     } catch (error) {
         console.error(error);
+        const response = { content: 'There was an error while executing this command!', ephemeral: true };
         if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ 
-                content: 'There was an error while executing this command!', 
-                ephemeral: true 
-            });
+            await interaction.followUp(response);
         } else {
-            await interaction.reply({ 
-                content: 'There was an error while executing this command!', 
-                ephemeral: true 
-            });
+            await interaction.reply(response);
         }
     }
 });
