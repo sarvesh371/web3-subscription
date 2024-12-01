@@ -11,8 +11,11 @@ export async function CreateSubscriptionList(req: Request, res: Response): Promi
             [name]
         );
 
-        // Return an error if the subscription already exists
-        if (subscriptionList && subscriptionList.length > 0) {
+        // Return an error if the subscription already exists. 
+        
+        
+
+        if ( !subscriptionList) {
             res.status(400).json({
                 status: "error",
                 data: [],

@@ -1,33 +1,42 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import Router from "./routes/index";
 import { SERVER_PORT } from './config/index';
 
-// === 1 - CREATE SERVER ===
-const server = express();
+// Initialize the Express application
+const app = express();
 
-// CONFIGURE HEADER INFORMATION
-const allowedOrigins =
-    ["PRODUCTION_URL",
-    "LOCALHOST_URL"];
-server.use(
-    cors({
-        origin: allowedOrigins,
-        credentials: true, // Allow cookies and credentials
-    }),
-);
-server.disable("x-powered-by"); //Reduce fingerprinting
-server.use(cookieParser());
-server.use(express.urlencoded({ extended: false }));
-server.use(express.json());
+// Middleware configuration
+const allowedOrigins = [
+    "PRODUCTION_URL",
+    "LOCALHOST_URL"
+];
 
+// CORS configuration
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true, // Allow cookies and credentials
+}));
 
-// === 4 - CONFIGURE ROUTES ===
+app.disable("x-powered-by"); // reduce fingerprinting
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
 // Connect Route handler to server
-Router(server);
+app.use("/api", Router); // Prefix all routes with /api
 
-// === 5 - START UP SERVER ===
-server.listen(SERVER_PORT, () => {
+// Error handling middleware
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error("Error occurred:", err);
+    res.status(500).json({
+        status: "failed",
+        message: "Internal Server Error",
+    });
+});
+
+// Start the server
+app.listen(SERVER_PORT, () => {
     console.log(`Server running on http://localhost:${SERVER_PORT}`);
 }); 
