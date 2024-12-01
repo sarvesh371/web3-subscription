@@ -34,6 +34,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         status: "failed",
         message: "Internal Server Error",
     });
+    next();
 });
 
 // Start the server

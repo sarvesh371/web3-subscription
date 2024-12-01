@@ -21,4 +21,16 @@ const envVariables = z.object({
   SSL: z.enum(['true', 'false']).transform(val => val === "true")
 });
 
-export const { DB_HOST, DB_USER, DB_DATABASE, DB_PASSWORD, DB_PORT, SERVER_PORT, SSL } = envVariables.parse(process.env);
+
+const config : z.infer<typeof envVariables> = { 
+  DB_HOST : process.env.DB_HOST?? "",
+  DB_USER : process.env.DB_USER??"",
+  DB_DATABASE : process.env.DB_DATABASE??"",
+  DB_PASSWORD : process.env.DB_PASSWORD??"",
+  DB_PORT : Number(process.env.DB_PORT)??0,
+  SERVER_PORT : Number(process.env.SERVER_PORT)??0,
+  SSL : JSON.parse(process.env.SSL??"false")
+}
+
+export const { DB_HOST, DB_USER, DB_DATABASE, DB_PASSWORD, DB_PORT, SERVER_PORT, SSL } = envVariables.parse(config);
+
