@@ -4,7 +4,7 @@
     "description": "This project helps people to integrate Signup, Login and logout in there apps",
     "main": "index.ts",
     "scripts": {
-        "dev": "node --watch index.ts",
+        "dev": "nodemon index.ts",
         "build": "rm -rf build/ && prettier --write v1/ && tsc && cp -r build/ public/"
     },
     "keywords": [],
