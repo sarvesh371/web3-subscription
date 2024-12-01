@@ -10,7 +10,7 @@ const pool = new Pool({
   port: parseInt(DB_PORT || "5432"),
   ssl: SSL === "true" ? true : SSL === "false" ? false : undefined,
 });
-s
+
 // Function to run a query
 export async function runQuery(queryText: string, values: any[] = []): Promise<any> {
   try {
