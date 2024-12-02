@@ -1,7 +1,19 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { AccessKeyManager } = require('../utils/supabase');
+import { 
+    SlashCommandBuilder, 
+    ChatInputCommandInteraction, 
+    GuildMember, 
+    Guild 
+} from 'discord.js';
+import supabaseManager, { AccessKeyType } from '../utils/supabase';
 
-module.exports = {
+interface AccessKeyCommandResult {
+    success: boolean;
+    roleId?: string;
+    keyType?: AccessKeyType;
+    remainingUses?: number;
+}
+
+export default {
     data: new SlashCommandBuilder()
         .setName('accesskey')
         .setDescription('Use an access key to get a role')
@@ -11,68 +23,72 @@ module.exports = {
                 .setRequired(true)
         ),
     
-    async execute(interaction) {
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
+        // Validate interaction type
         if (!interaction.isChatInputCommand()) return;
 
         const key = interaction.options.getString('key', true);
-        const member = interaction.member;
-        const guild = interaction.guild;
+        const member = interaction.member as GuildMember;
+        const guild = interaction.guild as Guild;
 
         // Validate member and guild presence
         if (!member || !guild) {
-            return await interaction.reply({
+            await interaction.reply({
                 content: 'Unable to process your request.',
                 ephemeral: true
             });
-        }
-
-        // Check key validity
-        const keyData = await AccessKeyManager.checkAccessKey(key, member.id, guild.id);
-        
-        if (!keyData?.valid) {
-            return await interaction.reply({
-                content: 'Invalid or already used access key.',
-                ephemeral: true
-            });
+            return;
         }
 
         try {
-            // Attempt to use the access key
-            const useResult = await AccessKeyManager.useAccessKey(key, member.id, guild.id);
+            // Check key validity
+            const keyData = await supabaseManager.checkAccessKey(key, member.id, guild.id);
+            
+            if (!keyData?.valid) {
+                await interaction.reply({
+                    content: 'Invalid or already used access key.',
+                    ephemeral: true
+                });
+                return;
+            }
+
+            // Use the access key
+            const useResult = await supabaseManager.useAccessKey(key, member.id, guild.id);
 
             if (!useResult?.success) {
-                return await interaction.reply({
+                await interaction.reply({
                     content: 'Failed to use access key.',
                     ephemeral: true
                 });
+                return;
             }
 
             // Validate roleId
             const roleId = useResult.role_id;
             if (!roleId) {
-                return await interaction.reply({
+                await interaction.reply({
                     content: 'No role ID found for this access key.',
                     ephemeral: true
                 });
+                return;
             }
 
-            console.log('Role ID to add:', roleId); // Add this line for debugging
-
-            // Attempt to add the role
+            // Add the role
             await member.roles.add(roleId);
 
             // Construct response message
             let responseMessage = 'Role successfully added!';
-            if (keyData.key_type === 'time_limited') {
+            if (keyData.key_type === AccessKeyType.TimeLimited) {
                 responseMessage += ' This is a time-limited access.';
-            } else if (keyData.key_type === 'multi_use') {
-                responseMessage += ` You have ${keyData.max_uses - keyData.currentUses - 1} uses remaining.`;
+            } else if (keyData.key_type === AccessKeyType.MultiUse) {
+                responseMessage += ` You have ${keyData.max_uses - keyData.current_uses - 1} uses remaining.`;
             }
 
             await interaction.reply({
                 content: responseMessage,
                 ephemeral: true
             });
+
         } catch (error) {
             console.error('Error processing access key:', error);
             await interaction.reply({

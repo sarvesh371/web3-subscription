@@ -1,7 +1,14 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { AccessKeyManager } = require('../utils/supabase');
+import { 
+    SlashCommandBuilder, 
+    ChatInputCommandInteraction, 
+    PermissionFlagsBits, 
+    Role,
+    Guild,
+    User
+} from 'discord.js';
+import supabaseManager, { AccessKeyType } from '../utils/supabase';
 
-module.exports = {
+export default {
     data: new SlashCommandBuilder()
         .setName('accessroleset')
         .setDescription('Create an access key for a specific role')
@@ -15,9 +22,9 @@ module.exports = {
                 .setDescription('Select the key type')
                 .setRequired(true)
                 .addChoices(
-                    { name: 'Single Use', value: 'single_use' },
-                    { name: 'Multi Use', value: 'multi_use' },
-                    { name: 'Time Limited', value: 'time_limited' }
+                    { name: 'Single Use', value: AccessKeyType.SingleUse },
+                    { name: 'Multi Use', value: AccessKeyType.MultiUse },
+                    { name: 'Time Limited', value: AccessKeyType.TimeLimited }
                 )
         )
         .addIntegerOption(option => 
@@ -33,29 +40,31 @@ module.exports = {
                 .setMaxValue(365)
         ),
     
-    async execute(interaction) {
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) return;
 
         // Ensure the user has admin permissions
         if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-            return interaction.reply({
+            await interaction.reply({
                 content: 'You must be an administrator to use this command.',
                 ephemeral: true
             });
+            return;
         }
 
-        const role = interaction.options.getRole('role', true);
-        const keyType = interaction.options.getString('type', true);
+        const role = interaction.options.getRole('role', true) as Role;
+        const keyType = interaction.options.getString('type', true) as AccessKeyType;
         const uses = interaction.options.getInteger('uses') || 1;
         const duration = interaction.options.getInteger('duration');
-        const guild = interaction.guild;
-        const creator = interaction.user;
+        const guild = interaction.guild as Guild;
+        const creator = interaction.user as User;
 
         if (!guild) {
-            return interaction.reply({
+            await interaction.reply({
                 content: 'Unable to process your request.',
                 ephemeral: true
             });
+            return;
         }
 
         // Construct key creation options
@@ -64,25 +73,26 @@ module.exports = {
             guildId: guild.id,
             createdBy: creator.id,
             keyType,
-            maxUses: keyType === 'multi_use' ? uses : 1,
-            validUntil: keyType === 'time_limited' && duration 
+            maxUses: keyType === AccessKeyType.MultiUse ? uses : 1,
+            validUntil: keyType === AccessKeyType.TimeLimited && duration 
                 ? new Date(Date.now() + duration * 24 * 60 * 60 * 1000) 
                 : undefined
         };
 
         // Create the access key
-        const accessKey = await AccessKeyManager.createAccessKey(keyOptions);
+        const accessKey = await supabaseManager.createAccessKey(keyOptions);
 
         if (accessKey) {
             // Send confirmation message
-            return interaction.reply({
+            await interaction.reply({
                 content: `Access key created for role ${role.name}:\n\`${accessKey.key}\``,
                 ephemeral: true
             });
+            return;
         }
 
         // Handle failure case
-        return interaction.reply({
+        await interaction.reply({
             content: 'Failed to create access key. Please try again later.',
             ephemeral: true
         });
