@@ -11,8 +11,18 @@ export async function CreateSubscriptionList(req: Request, res: Response): Promi
             [name]
         );
 
-        // Return an error if the subscription already exists
-        if (subscriptionList && subscriptionList.length > 0) {
+        // Return an error if the subscription already exists. 
+        
+        if (subscriptionList instanceof Error) {
+            res.status(500).json({
+                status: "error",
+                data: [],
+                message: "Internal Server Error , subscriptionList is not a valid object",
+            });
+            return;
+        }
+
+        if (subscriptionList.length ===0 ) {
             res.status(400).json({
                 status: "error",
                 data: [],

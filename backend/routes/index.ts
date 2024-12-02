@@ -18,7 +18,7 @@ const Router = (server: Application) => {
       });
     }
   });
-  server.post("/createsubscriptionlist", CreateSubscriptionList);
-  server.delete("/deletesubscriptionlist/:name", DeleteSubscriptionList);
+  server.post("/subs", CreateSubscriptionList);
+  server.delete("/subs/:name", DeleteSubscriptionList);
 };
 export default Router;
