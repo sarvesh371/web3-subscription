@@ -18,6 +18,7 @@ Deno.test("get /api/ working", async () => {
 	assertEquals(data.message, "Hello World");
 });
 
+
 Deno.test("post /api/subs working", async () => {
 	const res = await fetch(getUrl("/subs"), {
 		method: "POST",

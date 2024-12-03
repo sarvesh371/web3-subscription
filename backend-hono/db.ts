@@ -38,6 +38,7 @@ export const SubSchema = z.object({
  *     created_at: new Date(),
  * })=> Promise<Error | void>
  */
+
 export const postSubscription = async (subscription: z.infer<typeof SubSchema>) => {
     const { data, error } = await db
         .from("subscriptions_list")

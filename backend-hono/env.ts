@@ -4,6 +4,7 @@ import { z } from "zod";
 import "jsr:@std/dotenv/load"
 
 
+
 export const env = createEnv({
 	server: {
 		DB_HOST: z
