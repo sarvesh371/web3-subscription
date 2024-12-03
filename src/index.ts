@@ -6,6 +6,7 @@ import {
   Partials,
   ChatInputCommandInteraction,
   RESTPostAPIChatInputApplicationCommandsJSONBody,
+  Interaction,
 } from "discord.js";
 import fs from "fs/promises";
 import path from "path";
@@ -24,9 +25,9 @@ class DiscordBot {
     this.client = new Client({
       intents: [
         GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers, // Enable this in discord developer portal
+        GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent, // Enable this in discord developer portal
+        GatewayIntentBits.MessageContent,
       ],
       partials: [Partials.Channel],
     });
@@ -38,7 +39,9 @@ class DiscordBot {
 
   private setupEventListeners(): void {
     this.client.on("ready", this.onReady.bind(this));
-    this.client.on("interactionCreate", this.onInteractionCreate.bind(this));
+    this.client.on("interactionCreate", async (interaction) => {
+      await this.onInteractionCreate(interaction);
+    });
   }
 
   private onReady(): void {
@@ -46,7 +49,7 @@ class DiscordBot {
   }
 
   private async onInteractionCreate(
-    interaction: ChatInputCommandInteraction
+    interaction: Interaction
   ): Promise<void> {
     if (!interaction.isChatInputCommand()) return;
 
@@ -83,7 +86,7 @@ class DiscordBot {
   }
 
   public async loadCommands(): Promise<void> {
-    // Get the directory of the current module
+    
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
 
@@ -123,7 +126,6 @@ class DiscordBot {
   }
 }
 
-// Instantiate and start the bot
 const bot = new DiscordBot();
 bot.start();
 

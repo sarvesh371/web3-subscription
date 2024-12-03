@@ -6,7 +6,7 @@ import {
   Guild,
   User,
 } from "discord.js";
-import supabaseManager, { AccessKeyType } from "../utils/supabase";
+import supabaseManager, { AccessKeyType } from "../utils/supabase.ts";
 
 export default {
   data: new SlashCommandBuilder()

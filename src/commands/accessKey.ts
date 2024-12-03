@@ -4,7 +4,7 @@ import {
   GuildMember,
   Guild,
 } from "discord.js";
-import supabaseManager, { AccessKeyType } from "../utils/supabase.js";
+import supabaseManager, { AccessKeyType } from "../utils/supabase.ts";
 
 interface AccessKeyCommandResult {
   success: boolean;
