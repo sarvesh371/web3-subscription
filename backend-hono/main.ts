@@ -13,7 +13,7 @@ app.get("/", (c) => {
 	return c.json({ ok: true, message: "Hello World" });
 });
 
-app.post("/api/subs/", zValidator("json", SubSchema, (result, c) => {
+const subs_post = app.post("/api/subs/", zValidator("json", SubSchema, (result, c) => {
   console.log(result);
   if (!result.success) { 
     c.text("not valid schema for the subscription");
@@ -39,7 +39,7 @@ app.post("/api/subs/", zValidator("json", SubSchema, (result, c) => {
 	}
 });
 
-app.get("/api/subs/:id", async (c) => {
+const subs_get = app.get("/api/subs/:id", async (c) => {
 	// Changed this - params are handled differently
 	const id = c.req.param("id"); // Use param instead of query validator for URL parameters
 	const subs = await getSubscription(id);
@@ -47,7 +47,7 @@ app.get("/api/subs/:id", async (c) => {
 	return c.json({ ok: true, message: subs });
 });
 
-app.delete("/api/subs/:id", async (c) => {
+const subs_delete = app.delete("/api/subs/:id", async (c) => {
 	// Changed this - params are handled differently
 	const id = c.req.param("id"); // Use param instead of query validator for URL parameters
 	await deleteSubscription(id);
@@ -59,3 +59,6 @@ if (import.meta.main) {
 	Deno.serve({ port: env.DB_PORT }, app.fetch);
 }
 
+export type SubsPost = typeof subs_post; 
+export type SubsGet = typeof subs_get; 
+export type SubsDelete = typeof subs_delete;
