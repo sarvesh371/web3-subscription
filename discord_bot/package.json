@@ -1,12 +1,33 @@
 {
-  "name": "bot_haka",
+  "name": "discord-bot",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Production-ready Discord bot",
+  "type": "module",
   "scripts": {
+    "start": "node --experimental-specifier-resolution=node src/index.ts",
+    "build": "tsc",
+    "dev": "nodemon --exec node --loader ts-node/esm src/index.ts",
+    "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "discord",
+    "bot"
+  ],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "dependencies": {
+    "@supabase/supabase-js": "^2.46.2",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.9",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.1",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
 }
